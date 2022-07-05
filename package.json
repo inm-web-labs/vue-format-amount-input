@@ -1,13 +1,13 @@
 {
-	"name": "vue-amount-format-input",
+	"name": "vue-format-amount-input",
 	"version": "0.1.11",
 	"private": false,
 	"author": {
-		"name": "Tushar Gugnani",
-		"email": "tushar@5balloons.info"
+		"name": "inm_labs",
+		"email": "team-web@inm.pt"
 	},
-	"repository": "https://github.com/SamiYoshi/vue-amount-format-input",
-	"bugs": "https://github.com/SamiYoshi/vue-amount-format-input/issues",
+	"repository": "https://github.com/inm-web-labs/vue-format-amount-input",
+	"bugs": "https://github.com/inm-web-labs/vue-format-amount-input/issues",
 	"keywords": [
 		"amount",
 		"format",
@@ -17,11 +17,11 @@
 	"files": [
 		"dist/*"
 	],
-	"main": "dist/vue-amount-format-input.common.js",
+	"main": "dist/vue-format-amount-input.common.js",
 	"scripts": {
 		"serve": "vue-cli-service serve",
 		"build": "vue-cli-service build",
-		"build-library": "vue-cli-service build --target lib --name vue-amount-format-input ./src/install.js"
+		"build-library": "vue-cli-service build --target lib --name vue-format-amount-input ./src/install.js"
 	},
 	"dependencies": {
 		"core-js": "^3.6.5",
