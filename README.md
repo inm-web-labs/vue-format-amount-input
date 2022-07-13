@@ -48,3 +48,7 @@ options = {
 #### Options to be added to input:
 - emptyInputBehavior
 - decimalsLengthAllowed
+
+## Changelog
+
+- 0.1.13 - update vue-format-amount-input component blurEvent
