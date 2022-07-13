@@ -151,23 +151,6 @@ const keydownHandler = $event => {
 		}
 	}
 
-	/* Preventing user from writing "inside" currency or before/after depending on position, and reposition caret */
-	// if (!(($event.key === 'ArrowLeft' || $event.key === 'ArrowRight') && !$event.shiftKey)) {
-	// 	/* If we have a currencySymbol and it's displayed at right side */
-	// 	if (options.value.currencySymbol &&
-	// 		options.value.currencySymbolPlacement === 's' &&
-	// 		elem.value.includes(options.value.currencySymbol)) {
-	// 		/* We need to validate caret position */
-	// 		if ((elem.selectionEnd > (elem.value.length - currencyLengthAtRight.value)) && elem.selectionEnd === elem.selectionStart) {
-	// 			console.log('s', currentCaretPositon.value, elem.value.length, elem.value)
-	// 		}
-	// 	} else if (options.value.currencySymbol &&
-	// 		options.value.currencySymbolPlacement === 'p' &&
-	// 		elem.value.includes(options.value.currencySymbol)) {
-	// 		console.log('p')
-	// 	}
-	// }
-
 	/* Preventing zeros from being inserted at left of number if we already have a decimalChar */
 	if ($event.key === '0' &&
 		elem.selectionEnd === currencyLengthAtLeft.value &&
@@ -297,7 +280,6 @@ const keydownHandler = $event => {
 @return { void }
 */
 const blurHandler = $event => {
-	emit('blur', $event)
 	inputOnFocus.value = false
 
 	const valueWithoutCurrency = removeCurrencySymbol(_value.value)
@@ -320,6 +302,7 @@ const blurHandler = $event => {
 	} else {
 		setCurrencyShowValue(false)
 	}
+	setTimeout(() => emit('blur', $event))
 }
 
 /* Logic to display currencySymbol on Focus / mouseOverHandler / mouseLeaveHandler, when input is empty */
