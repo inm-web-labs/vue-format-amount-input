@@ -52,3 +52,4 @@ options = {
 ## Changelog
 
 - 0.1.13 - update vue-format-amount-input component blurEvent
+- 0.1.14 - build fixing
