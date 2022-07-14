@@ -23,7 +23,7 @@ Options allow you to customize how the input will format the amount as you type.
 | :----------------: | :-----------:  | :-----------:  |
 | `digitGroupSeparator` | Thousands group separator | `null` |
 | `decimalChar` | Decimal separator character. Allowed values: `.` `,` `٫` | `.` |
-| `alwaysAllowDecimalCharacter | Allows/Disables decimals in amounts | `true` |
+| `alwaysAllowDecimalCharacter` | Allows/Disables decimals in amounts | `true` |
 | `showCurrencyOnFocus` | Defines if currency should be shown on input focus | `false` |
 | `showCurrencyOnHover` | Defines if currency should be shown on input hover | `false` |
 | `currencySymbol` | Defines currency symbol to display | `null` |
