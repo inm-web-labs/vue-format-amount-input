@@ -309,9 +309,9 @@ const blurHandler = $event => {
 const focusHandler = $event => {
 	if (!inputOnFocus.value) triggerFocusCaret.value = true
 	inputOnFocus.value = true
-	setCurrencyShowValue(true)
+	if (options.value.currencySymbol) setCurrencyShowValue(true)
 }
-const mouseOverHandler = $event => { if (options.value.showCurrencyOnHover) setCurrencyShowValue(true) }
+const mouseOverHandler = $event => { if (options.value.showCurrencyOnHover && options.value.currencySymbol) setCurrencyShowValue(true) }
 const mouseLeaveHandler = $event => { if (!inputOnFocus.value) setCurrencyShowValue(false) }
 
 const setCurrencyShowValue = state => {

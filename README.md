@@ -53,3 +53,4 @@ options = {
 
 - 0.1.13 - update vue-format-amount-input component blurEvent
 - 0.1.14 - build fixing
+- 0.1.15 - fixed behaviour of hover/focus when no currency is provided
