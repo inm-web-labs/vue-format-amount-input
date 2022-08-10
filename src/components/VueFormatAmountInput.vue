@@ -297,7 +297,9 @@ const blurHandler = $event => {
 			temp = `${valueWithoutCurrency}${options.value.decimalChar}${decimals}`
 		}
 
-		$event.target.value = currencyPrefix ? `${options.value.currencySymbol} ${temp}` : `${temp} ${options.value.currencySymbol}`
+		if (options.value.currencySymbol.length) {
+			$event.target.value = currencyPrefix ? `${options.value.currencySymbol} ${temp}` : `${temp} ${options.value.currencySymbol}`
+		} else $event.target.value = temp
 		updateValue($event.target.value)
 	} else {
 		setCurrencyShowValue(false)

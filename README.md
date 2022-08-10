@@ -55,3 +55,4 @@ options = {
 - 0.1.14 - build fixing
 - 0.1.15 - fixed behaviour of hover/focus when no currency is provided
 - 0.1.16 - fixed currency length validator when no currency is provided
+- 0.1.17 - updated blur function when no currency is provided
