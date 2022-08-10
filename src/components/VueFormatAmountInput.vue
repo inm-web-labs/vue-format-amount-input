@@ -66,12 +66,12 @@ const options = computed(() => {
 })
 
 const currencyLengthAtLeft = computed(() => {
-	if (options.value.currencySymbolPlacement === 's') return 0
+	if (options.value.currencySymbolPlacement === 's' || !options.value.currencySymbol.length) return 0
 	return options.value.currencySymbol.length + 1 // 1 is the space between our currency and number
 })
 
 const currencyLengthAtRight = computed(() => {
-	if (options.value.currencySymbolPlacement === 'p') return 0
+	if (options.value.currencySymbolPlacement === 'p' || !options.value.currencySymbol.length) return 0
 	return options.value.currencySymbol.length + 1 // 1 is the space between our currency and number
 })
 
