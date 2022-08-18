@@ -26,6 +26,7 @@ const emit = defineEmits(['input', 'keydown', 'blur'])
 	- digitGroupSeparator { String } default value => '.'
 	- decimalChar: { String } default value => '.'
 	- alwaysAllowDecimalCharacter { Boolean } default value => true
+	- allowNegativeValues { Boolean } default value => false
 	- showCurrencyOnFocus: { Boolean } default value => false
 	- showCurrencyOnHover: { Boolean } default value => false
 	- currencySymbolPlacement: { String } default value => 'p'
@@ -49,6 +50,7 @@ const defaultOptions = {
 	decimalChar: '.',
 	decimalsAllowed: 2, /* not handle yet */
 	alwaysAllowDecimalCharacter: true,
+	allowNegativeValues: false,
 	showCurrencyOnFocus: false,
 	showCurrencyOnHover: false,
 	currencySymbolPlacement: 'p',
@@ -91,6 +93,7 @@ const INTEGER_PATTERN = '(0|[1-9]\\d*)'
 
 /* we could also use selectionStart, since both props are the same when writing */
 const currentCaretPositon = ref(0)
+const valueHasNegativeChar = ref(false)
 
 /*************************************************
 *                                                *
@@ -117,6 +120,10 @@ watch(() => options.value.currencySymbol, (newVal, oldVal) => {
 *************************************************/
 const isValidSeparator = key => { return !!ALLOWED_DECIMAL_SEPARATORS.find(separator => separator === key) }
 const isDigit = key => { return !!key.match(INTEGER_PATTERN) }
+const allowNegativeSign = (value, index, key) => {
+	if (!options.value.allowNegativeValues && key === '-') return false
+	if (key === '-' && index - (value.includes(options.value.currencySymbol) ? currencyLengthAtLeft.value : 0) === 0) return true
+}
 
 /*************************************************
 *                                                *
@@ -283,24 +290,33 @@ const blurHandler = $event => {
 	inputOnFocus.value = false
 
 	const valueWithoutCurrency = removeCurrencySymbol(_value.value)
+	const rawValue = valueWithoutCurrency.replace('-', '')
 
-	if (valueWithoutCurrency.length > 0 && options.value.alwaysAllowDecimalCharacter) {
+	if (rawValue.length > 0 && options.value.alwaysAllowDecimalCharacter) {
 		const currencyPrefix = options.value.currencySymbolPlacement === 'p'
 		/* Creating a string with options.value.decimalsAllowed zeros */
-		const decimalsNeeded = options.value.decimalsAllowed - checkDecimalCharsLength(valueWithoutCurrency)
+		const decimalsNeeded = options.value.decimalsAllowed - checkDecimalCharsLength(rawValue)
 		const decimals = Array.from({ length: decimalsNeeded }, (v, k) => '0').join('')
+		/* we should use raw value if we want to hide negative sign, no sense in showing -0.00 */
+		const applyNegativeSymbol = parseFloat(unformat(rawValue)) > 0
 
 		let temp
 		if (_value.value.includes(options.value.decimalChar)) {
-			temp = `${valueWithoutCurrency}${decimals}`
+			temp = `${applyNegativeSymbol ? valueWithoutCurrency : rawValue}${decimals}`
 		} else {
-			temp = `${valueWithoutCurrency}${options.value.decimalChar}${decimals}`
+			temp = `${applyNegativeSymbol ? valueWithoutCurrency : rawValue}${options.value.decimalChar}${decimals}`
 		}
 
 		if (options.value.currencySymbol.length) {
 			$event.target.value = currencyPrefix ? `${options.value.currencySymbol} ${temp}` : `${temp} ${options.value.currencySymbol}`
 		} else $event.target.value = temp
 		updateValue($event.target.value)
+	/* If our input only has the negative sign, we want to remove it on blur */
+} else if (rawValue.length <= 0) {
+		valueHasNegativeChar.value = false
+		$event.target.value = $event.target.value.replace('-', '')
+		updateValue($event.target.value)
+		setCurrencyShowValue(false)
 	} else {
 		setCurrencyShowValue(false)
 	}
@@ -340,6 +356,7 @@ const inputValueHandler = $event => {
 		if (checkIfDecimals.length === 0) elem.value = elem.value.split(options.value.decimalChar)[0]
 	}
 	currentCaretPositon.value = elem.selectionEnd
+	valueHasNegativeChar.value = false
 	handleValueChange(elem, $event.inputType === 'insertFromPaste')
 }
 
@@ -391,9 +408,11 @@ const removingUnwantedChars = value => {
 	var newValueArray = []
 
     for (var y = 0; y < valueArrayLength; y++) {
-        if ((isValidSeparator(valueArray[y]) && options.value.alwaysAllowDecimalCharacter) || isDigit(valueArray[y])) {
+		if (allowNegativeSign(value, y, valueArray[y])) valueHasNegativeChar.value = true
+
+		if ((isValidSeparator(valueArray[y]) && options.value.alwaysAllowDecimalCharacter) || isDigit(valueArray[y])) {
 			newValueArray.push(valueArray[y])
-		} else if (y < currentCaretPositon.value) {
+		} else if (y < currentCaretPositon.value && !(allowNegativeSign(value, y, valueArray[y]))) {
 			/* if we remove a char before our caret position, we need to subtract 1 to it's position for every nonvalid char */
 			currentCaretPositon.value--
 		}
@@ -515,6 +534,7 @@ const format = (value, decimals) => {
 
 	_value = applyingDecimals(_value, decimals)
 	_value = applyingGroupSeparator(_value, decimals)
+	_value = applyingNegativeSymbol(_value)
 	_value = applyingCurrencySymbol(_value)
 	return _value
 }
@@ -565,6 +585,16 @@ const applyingGroupSeparator = (value, decimals) => {
 }
 
 /*
+* Adding negative sign to amount string
+@value { String }
+@return { String }
+*/
+const applyingNegativeSymbol = value => {
+	if (!options.value.allowNegativeValues || !valueHasNegativeChar.value) return value
+	return `-${value}`
+}
+
+/*
 * Adding currency to amount string
 @value { String }
 @return { String }
@@ -611,8 +641,10 @@ const formatToNumber = value => {
 	let valueNumbered = unformat(value)
 
 	if (!valueNumbered.length) return null
-
 	valueNumbered = parseFloat(applyingDecimals(valueNumbered, decimals, true))
+
+	/* Adding negative sign */
+	if (options.value.allowNegativeValues && valueHasNegativeChar.value) valueNumbered = valueNumbered * -1
 
 	return valueNumbered
 }
