@@ -24,6 +24,7 @@ Options allow you to customize how the input will format the amount as you type.
 | `digitGroupSeparator` | Thousands group separator | `null` |
 | `decimalChar` | Decimal separator character. Allowed values: `.` `,` `٫` | `.` |
 | `alwaysAllowDecimalCharacter` | Allows/Disables decimals in amounts | `true` |
+| `allowNegativeValues` | Allows/Disables negative amounts | `false` |
 | `showCurrencyOnFocus` | Defines if currency should be shown on input focus | `false` |
 | `showCurrencyOnHover` | Defines if currency should be shown on input hover | `false` |
 | `currencySymbol` | Defines currency symbol to display | `null` |
@@ -36,6 +37,7 @@ options = {
 	digitGroupSeparator: '',
 	decimalChar: '.',
 	alwaysAllowDecimalCharacter: true,
+	allowNegativeValues: false,
 	showCurrencyOnFocus: false,
 	showCurrencyOnHover: false,
 	currencySymbolPlacement: 'p',
@@ -56,3 +58,4 @@ options = {
 - 0.1.15 - fixed behaviour of hover/focus when no currency is provided
 - 0.1.16 - fixed currency length validator when no currency is provided
 - 0.1.17 - updated blur function when no currency is provided
+- 0.1.18 - added option to have negative amounts
