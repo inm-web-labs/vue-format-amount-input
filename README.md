@@ -59,3 +59,4 @@ options = {
 - 0.1.16 - fixed currency length validator when no currency is provided
 - 0.1.17 - updated blur function when no currency is provided
 - 0.1.18 - added option to have negative amounts
+- 0.1.19 - fixed bug when clearing negative value

@@ -103,7 +103,6 @@ const valueHasNegativeChar = ref(false)
 /* We want to watch external changes on value and re-format our input value when it changes */
 watch(() => props.value, (newVal, oldVal) => {
 	if (newVal === formatToNumber(_value.value)) return
-
 	_value.value = newVal
 	setTimeout(() => handleValueChange(inputDomRef.value, true), 0)
 })
@@ -426,6 +425,7 @@ const removingUnwantedChars = value => {
 */
 const handlePasteValue = pastedValue => {
 	let value = removingUnwantedChars(pastedValue)
+	if (!pastedValue.length) valueHasNegativeChar.value = false
 
 	/*
 	* Second we will check if this value is a valid number
