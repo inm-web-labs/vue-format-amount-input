@@ -31,7 +31,7 @@ const emit = defineEmits(['input', 'keydown', 'blur'])
 	- showCurrencyOnHover: { Boolean } default value => false
 	- currencySymbolPlacement: { String } default value => 'p'
 	- currencySymbol: { String } default value => ''
-	- maxValue: { String } default value => 99999999999999.98
+	- maxValue: { String } default value => '99999999999999999999999.99'
 */
 const props = defineProps({
 	value: [String, Number],
@@ -55,7 +55,7 @@ const defaultOptions = {
 	showCurrencyOnHover: false,
 	currencySymbolPlacement: 'p',
 	currencySymbol: '',
-	maxValue: 99999999999999.98 /* Max value before js start rounding values */
+	maxValue: '99999999999999999999999.99'
 }
 
 /* Joining default options with received */
@@ -63,7 +63,7 @@ const options = computed(() => {
 	return {
 		...defaultOptions,
 		...props.options,
-		maxValue: !props.options.maxValue || props.options.maxValue > defaultOptions.maxValue ? defaultOptions.maxValue : props.options.maxValue
+		maxValue: props.options.maxValue || defaultOptions.maxValue
 	}
 })
 
@@ -79,10 +79,47 @@ const currencyLengthAtRight = computed(() => {
 
 /*************************************************
 *                                                *
+*                VALIDATORS HELPERS              *
+*                                                *
+*************************************************/
+const isValidSeparator = key => { return !!ALLOWED_DECIMAL_SEPARATORS.find(separator => separator === key) }
+const isDigit = key => { return !!key.match(INTEGER_PATTERN) }
+const allowNegativeSign = (value, index, key) => {
+	if (!options.value.allowNegativeValues && key === '-') return false
+	if (key === '-' && index - (value.includes(options.value.currencySymbol) ? currencyLengthAtLeft.value : 0) === 0) return true
+}
+const addDecimalsToValue = value => {
+	let _value = `${value}${options.value.decimalChar}`
+	_value = _value.padEnd(_value.length + options.value.decimalsAllowed, '0')
+	return _value
+}
+
+const validateIfAmountInsideMaxValueRange = value => {
+	/* Adding decimals allowed to our number for lengths compares */
+	const valueWidthDecimals = value.includes(options.value.decimalChar) ? value : addDecimalsToValue(value)
+	/* First we check length, if length is lower we know the value is in range */
+	if (value.length < options.value.maxValue.length) return true
+	/* If the length is the same we will need to check each position */
+	else if (value.length === options.value.maxValue.length) {
+		let numberIsInRange = true
+		let i = 0
+
+		while (numberIsInRange && i < value.length) {
+			if (parseInt(value[i]) > parseInt(options.value.maxValue[i])) {
+				numberIsInRange = false
+			}
+			i++
+		}
+		return numberIsInRange
+	} else return false
+}
+
+/*************************************************
+*                                                *
 *                     DATA                       *
 *                                                *
 *************************************************/
-const _value = ref(props.value > options.value.maxValue ? '' : props.value)
+const _value = ref(props.value && validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false })) ? props.value.toString() : '')
 const inputDomRef = ref('')
 const showCurrency = ref(false)
 const inputOnFocus = ref(false)
@@ -102,7 +139,7 @@ const valueHasNegativeChar = ref(false)
 *************************************************/
 /* We want to watch external changes on value and re-format our input value when it changes */
 watch(() => props.value, (newVal, oldVal) => {
-	if (newVal === formatToNumber(_value.value)) return
+	if (newVal === formatToOnlyAmount(_value.value)) return
 	_value.value = newVal
 	setTimeout(() => handleValueChange(inputDomRef.value, true), 0)
 })
@@ -111,18 +148,6 @@ watch(() => props.value, (newVal, oldVal) => {
 watch(() => options.value.currencySymbol, (newVal, oldVal) => {
 	_value.value = changeCurrencySymbol(_value.value, newVal, oldVal)
 })
-
-/*************************************************
-*                                                *
-*                VALIDATORS HELPERS              *
-*                                                *
-*************************************************/
-const isValidSeparator = key => { return !!ALLOWED_DECIMAL_SEPARATORS.find(separator => separator === key) }
-const isDigit = key => { return !!key.match(INTEGER_PATTERN) }
-const allowNegativeSign = (value, index, key) => {
-	if (!options.value.allowNegativeValues && key === '-') return false
-	if (key === '-' && index - (value.includes(options.value.currencySymbol) ? currencyLengthAtLeft.value : 0) === 0) return true
-}
 
 /*************************************************
 *                                                *
@@ -371,7 +396,7 @@ const handleValueChange = (elem, insertedFromPaste) => {
 	if (insertedFromPaste) elem.value = handlePasteValue(elem.value)
 	const decimals = checkDecimalCharsLength(elem.value)
 
-	if (validateIfBigThenMaxValue(elem.value)) {
+	if (!validateIfAmountInsideMaxValueRange(elem.value)) {
 		elem.value = _value.value
 		currentCaretPositon.value = currentCaretPositon.value + options.value.currencySymbol.length
 		setCaretPosition(elem, currentCaretPositon.value)
@@ -504,11 +529,6 @@ const checkDecimalCharsLength = value => {
 	return decimalChars
 }
 
-/* Validating if number is bigger then maxValue, if so change currentCaretPositon value */
-const validateIfBigThenMaxValue = value => {
-	return Number(value.replaceAll('.', '').replace(',', '.')) > options.value.maxValue
-}
-
 /*
 * Unformating our value to only have numbers in our string
 @value { String }
@@ -632,16 +652,16 @@ const changeCurrencySymbol = (value, newCurrency, oldCurrency) => {
 }
 
 /*
-* Converts string to number and returns it
+* Converts string to amount without formats and currencies
 @value { String }
-@return { Number }
+@return { string }
 */
-const formatToNumber = value => {
+const formatToOnlyAmount = value => {
 	const decimals = checkDecimalCharsLength(value)
 	let valueNumbered = unformat(value)
-
 	if (!valueNumbered.length) return null
-	valueNumbered = parseFloat(applyingDecimals(valueNumbered, decimals, true))
+
+	valueNumbered = applyingDecimals(valueNumbered, decimals, true)
 
 	/* Adding negative sign */
 	if (options.value.allowNegativeValues && valueHasNegativeChar.value) valueNumbered = valueNumbered * -1
@@ -666,12 +686,13 @@ const stringReplaceAt = (string, index, replacementValue) => {
 /* Update _value and emit it without format and currency */
 const updateValue = value => {
 	_value.value = value
-	emit('input', formatToNumber(value))
+	emit('input', formatToOnlyAmount(value))
 }
 
 onMounted(() => {
-	if (props.value > options.value.maxValue) {
-		console.warn(`Value <${props.value}> falls out of our maxValue <${options.value.maxValue}>`)
+	/* Warning user if the value exceeds max value allowed */
+	if (props.value && !validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
+		console.warn(`Value <${props.value.toLocaleString('fullwide', { useGrouping: false })}> falls out of our maxValue <${options.value.maxValue}>`)
 	}
 	handleValueChange(inputDomRef.value, true)
 })

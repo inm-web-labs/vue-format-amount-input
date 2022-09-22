@@ -29,7 +29,7 @@ Options allow you to customize how the input will format the amount as you type.
 | `showCurrencyOnHover` | Defines if currency should be shown on input hover | `false` |
 | `currencySymbol` | Defines currency symbol to display | `null` |
 | `currencySymbolPlacement` | Defines where currencySymbol will be displayed. Possible values `p` for prefix and `s` for suffix | `p` |
-| `maxValue` | The maximum value that can be entered | `99999999999999.98` |
+| `maxValue` | The maximum value that can be entered | `99999999999999999999999.99` |
 
 Our Input will receive these options as an Object in prop `options` as the example below:
 ```
@@ -42,7 +42,7 @@ options = {
 	showCurrencyOnHover: false,
 	currencySymbolPlacement: 'p',
 	currencySymbol: '',
-	maxValue: 99999999999999.98
+	maxValue: 99999999999999999999999.99
 }
 ```
 ## TODO List
@@ -60,3 +60,4 @@ options = {
 - 0.1.17 - updated blur function when no currency is provided
 - 0.1.18 - added option to have negative amounts
 - 0.1.19 - fixed bug when clearing negative value
+- 0.2.00 - changed maxValue logic and default value; To prevent Scientific notation on numbers value is now returned and used as a string
