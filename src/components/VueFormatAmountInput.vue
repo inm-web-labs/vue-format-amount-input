@@ -146,7 +146,7 @@ watch(() => props.value, (newVal, oldVal) => {
 
 /* Watching if currency change, and reformat our value */
 watch(() => options.value.currencySymbol, (newVal, oldVal) => {
-	_value.value = changeCurrencySymbol(_value.value, newVal, oldVal)
+	if (_value.value.length && _value.value.includes(oldVal)) _value.value = changeCurrencySymbol(_value.value, newVal, oldVal)
 })
 
 /*************************************************
@@ -348,21 +348,30 @@ const blurHandler = $event => {
 }
 
 /* Logic to display currencySymbol on Focus / mouseOverHandler / mouseLeaveHandler, when input is empty */
+const preventEmitInput = ref(false)
 const focusHandler = $event => {
+	preventEmitInput.value = false
 	if (!inputOnFocus.value) triggerFocusCaret.value = true
 	inputOnFocus.value = true
 	if (options.value.currencySymbol) setCurrencyShowValue(true)
 }
-const mouseOverHandler = $event => { if (options.value.showCurrencyOnHover && options.value.currencySymbol) setCurrencyShowValue(true) }
-const mouseLeaveHandler = $event => { if (!inputOnFocus.value) setCurrencyShowValue(false) }
 
-const setCurrencyShowValue = state => {
+const mouseOverHandler = $event => {
+	if (options.value.showCurrencyOnHover && options.value.currencySymbol && !inputOnFocus.value) {
+		setCurrencyShowValue(true, 'preventEmitInput')
+	}
+}
+const mouseLeaveHandler = $event => {
+	if (!inputOnFocus.value) setCurrencyShowValue(false, 'preventEmitInput')
+}
+
+const setCurrencyShowValue = (state, preventEmitInput) => {
 	showCurrency.value = state
 	const valueWithoutCurrency = removeCurrencySymbol(_value.value)
 
 	if (valueWithoutCurrency.length <= 0) {
 		if (!state) currentCaretPositon.value = 0
-		setTimeout(() => handleValueChange(inputDomRef.value, true), 0)
+		setTimeout(() => handleValueChange(inputDomRef.value, true, preventEmitInput), 0)
 	}
 }
 
@@ -390,7 +399,7 @@ const inputValueHandler = $event => {
 @insertedFromPaste { Boolean }
 @return { string }
 */
-const handleValueChange = (elem, insertedFromPaste) => {
+const handleValueChange = (elem, insertedFromPaste, preventEmitInput) => {
 	elem.value = removingUnwantedChars(elem.value)
 
 	if (insertedFromPaste) elem.value = handlePasteValue(elem.value)
@@ -417,7 +426,7 @@ const handleValueChange = (elem, insertedFromPaste) => {
 	}
 	setCaretPosition(elem, currentCaretPositon.value)
 
-	updateValue(elem.value)
+	updateValue(elem.value, preventEmitInput)
 }
 
 /*
@@ -648,6 +657,9 @@ const removeCurrencySymbol = value => {
 @return { String }
 */
 const changeCurrencySymbol = (value, newCurrency, oldCurrency) => {
+	console.log(value, 'value')
+	console.log(newCurrency, 'newVal')
+	console.log(oldCurrency, 'oldVal')
 	return value.replace(oldCurrency, newCurrency)
 }
 
@@ -684,8 +696,9 @@ const stringReplaceAt = (string, index, replacementValue) => {
 }
 
 /* Update _value and emit it without format and currency */
-const updateValue = value => {
+const updateValue = (value, preventEmitInput) => {
 	_value.value = value
+	if (preventEmitInput) return
 	emit('input', formatToOnlyAmount(value))
 }
 

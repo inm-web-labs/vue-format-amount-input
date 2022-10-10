@@ -61,3 +61,4 @@ options = {
 - 0.1.18 - added option to have negative amounts
 - 0.1.19 - fixed bug when clearing negative value
 - 0.2.00 - changed maxValue logic and default value; To prevent Scientific notation on numbers value is now returned and used as a string
+- 0.2.01 - fixed bug when changing currency and input had no content
