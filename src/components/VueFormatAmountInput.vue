@@ -96,9 +96,11 @@ const addDecimalsToValue = value => {
 
 const validateIfAmountInsideMaxValueRange = value => {
 	/* Adding decimals allowed to our number for lengths compares */
-	const valueWidthDecimals = value.includes(options.value.decimalChar) ? value : addDecimalsToValue(value)
+	let valueWidthDecimals = value.includes(options.value.decimalChar) ? value : addDecimalsToValue(value)
+
+	valueWidthDecimals = valueWidthDecimals.replaceAll(options.value.digitGroupSeparator, '')
 	/* First we check length, if length is lower we know the value is in range */
-	if (value.length < options.value.maxValue.length) return true
+	if (valueWidthDecimals.length <= options.value.maxValue.length) return true
 	/* If the length is the same we will need to check each position */
 	else if (value.length === options.value.maxValue.length) {
 		let numberIsInRange = true
