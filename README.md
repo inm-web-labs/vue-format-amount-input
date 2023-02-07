@@ -63,3 +63,4 @@ options = {
 - 0.2.00 - changed maxValue logic and default value; To prevent Scientific notation on numbers value is now returned and used as a string
 - 0.2.01 - fixed bug when changing currency and input had no content
 - 0.2.02 - fixed variable used to compare maxValue and validation
+- 0.2.03 - fixed logic behind removing currency from value
