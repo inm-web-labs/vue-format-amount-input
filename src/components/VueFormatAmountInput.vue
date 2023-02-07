@@ -661,9 +661,6 @@ const removeCurrencySymbol = value => {
 @return { String }
 */
 const changeCurrencySymbol = (value, newCurrency, oldCurrency) => {
-	console.log(value, 'value')
-	console.log(newCurrency, 'newVal')
-	console.log(oldCurrency, 'oldVal')
 	return value.replace(oldCurrency, newCurrency)
 }
 
@@ -703,7 +700,6 @@ const stringReplaceAt = (string, index, replacementValue) => {
 const updateValue = (value, preventEmitInput) => {
 	_value.value = value
 	if (preventEmitInput) return
-	console.log(formatToOnlyAmount(value))
 	emit('input', formatToOnlyAmount(value))
 }
 

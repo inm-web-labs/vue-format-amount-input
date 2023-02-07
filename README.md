@@ -64,3 +64,4 @@ options = {
 - 0.2.01 - fixed bug when changing currency and input had no content
 - 0.2.02 - fixed variable used to compare maxValue and validation
 - 0.2.03 - fixed logic behind removing currency from value
+- 0.2.04 - removed console.logs
