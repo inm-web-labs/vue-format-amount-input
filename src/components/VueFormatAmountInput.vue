@@ -4,6 +4,7 @@
 	ref="inputDomRef"
 	:value="_value"
 	:placeholder="placeholder"
+	:disabled="disableInput"
 	@keydown="keydownHandler"
 	@input="inputValueHandler"
 	@focus="focusHandler"
@@ -124,6 +125,7 @@ const validateIfAmountInsideMaxValueRange = value => {
 const _value = ref(props.value && validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false })) ? props.value.toString() : '')
 const inputDomRef = ref('')
 const showCurrency = ref(false)
+const disableInput = ref(true)
 const inputOnFocus = ref(false)
 const triggerFocusCaret = ref(false)
 
@@ -633,6 +635,8 @@ const applyingNegativeSymbol = value => {
 const applyingCurrencySymbol = value => {
 	if ((!options.value.currencySymbol.length || !value.length) && !showCurrency.value) return value
 
+	if (!value.length && !inputOnFocus.value) return value
+
 	if (options.value.currencySymbolPlacement === 'p') {
 		/* this 1 is the space between currency and value */
 		currentCaretPositon.value = currentCaretPositon.value + currencyLengthAtLeft.value
@@ -683,7 +687,12 @@ const formatToOnlyAmount = value => {
 }
 
 /* Position input caret in specific position */
-const setCaretPosition = (elem, position) => { elem.setSelectionRange(position, position) }
+const setCaretPosition = (elem, position) => {
+	/* We only needo/want to trigger the change of caret position if you is inputing the value */
+	if (inputOnFocus.value) {
+		elem.setSelectionRange(position, position)
+	}
+}
 
 /*
 * Replaces a number in our value string
