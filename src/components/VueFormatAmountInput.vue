@@ -281,7 +281,9 @@ const keydownHandler = $event => {
 	if (isDigit($event.key) &&
 		checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
 		elem.selectionStart === elem.selectionEnd &&
-		elem.selectionEnd === valNoCurrency.length) $event.preventDefault()
+		elem.selectionEnd === valNoCurrency.length) {
+		$event.preventDefault()
+	}
 
 	/*
 	* If we already have 2 decimals chars,
@@ -290,7 +292,8 @@ const keydownHandler = $event => {
 	if (isDigit($event.key) &&
 		checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
 		elem.selectionEnd >= (valNoCurrency.length - options.value.decimalsAllowed) &&
-		elem.selectionEnd !== valNoCurrency.length) {
+		elem.selectionEnd !== valNoCurrency.length &&
+		elem.selectionStart === elem.selectionEnd) {
 		/*
 		* If our caret position is bigger than our valNoCurrency.length, and currencySymbolPlacement is s,
 		* it means user is trying to insert numbers "inside/after" our currencySymbol
@@ -412,7 +415,7 @@ const handleValueChange = (elem, insertedFromPaste, preventEmitInput) => {
 	elem.value = removingUnwantedChars(elem.value)
 
 	if (insertedFromPaste) elem.value = handlePasteValue(elem.value)
-	console.log(elem.value)
+
 	const decimals = checkDecimalCharsLength(elem.value)
 	elem.value = unformat(elem.value)
 	elem.value = format(elem.value, decimals)
