@@ -98,10 +98,10 @@ const addDecimalsToValue = value => {
 const validateIfAmountInsideMaxValueRange = value => {
 	/* Adding decimals allowed to our number for lengths compares */
 	let valueWidthDecimals = value.includes(options.value.decimalChar) ? value : addDecimalsToValue(value)
-
 	valueWidthDecimals = valueWidthDecimals.replaceAll(options.value.digitGroupSeparator, '')
+
 	/* First we check length, if length is lower we know the value is in range */
-	if (valueWidthDecimals.length <= options.value.maxValue.length) return true
+	if (valueWidthDecimals.length < options.value.maxValue.length) return true
 	/* If the length is the same we will need to check each position */
 	else if (value.length === options.value.maxValue.length) {
 		let numberIsInRange = true
@@ -279,18 +279,18 @@ const keydownHandler = $event => {
 	const valNoCurrency = options.value.currencySymbolPlacement === 's' ? removeCurrencySymbol(elem.value) : elem.value
 	/* Preventing user from writinig more than two decimals chars */
 	if (isDigit($event.key) &&
-	checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
-	elem.selectionStart === elem.selectionEnd &&
-	elem.selectionEnd === valNoCurrency.length) $event.preventDefault()
+		checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
+		elem.selectionStart === elem.selectionEnd &&
+		elem.selectionEnd === valNoCurrency.length) $event.preventDefault()
 
 	/*
 	* If we already have 2 decimals chars,
 	* and user is trying to insert another one, we will want to change the next decimal to new inserted value
 	*/
 	if (isDigit($event.key) &&
-	checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
-	elem.selectionEnd >= (valNoCurrency.length - options.value.decimalsAllowed) &&
-	elem.selectionEnd !== valNoCurrency.length) {
+		checkDecimalCharsLength(valNoCurrency) >= options.value.decimalsAllowed &&
+		elem.selectionEnd >= (valNoCurrency.length - options.value.decimalsAllowed) &&
+		elem.selectionEnd !== valNoCurrency.length) {
 		/*
 		* If our caret position is bigger than our valNoCurrency.length, and currencySymbolPlacement is s,
 		* it means user is trying to insert numbers "inside/after" our currencySymbol
@@ -305,6 +305,10 @@ const keydownHandler = $event => {
 		setCaretPosition(elem, currentCaretPositon.value)
 
 		updateValue(elem.value)
+		$event.preventDefault()
+	}
+
+	if (isDigit($event.key) && !validateIfAmountInsideMaxValueRange(elem.value)) {
 		$event.preventDefault()
 	}
 }
@@ -366,7 +370,7 @@ const mouseOverHandler = $event => {
 	}
 }
 const mouseLeaveHandler = $event => {
-	if (!inputOnFocus.value) setCurrencyShowValue(false, 'preventEmitInput')
+	if (options.value.showCurrencyOnHover && !inputOnFocus.value) setCurrencyShowValue(false, 'preventEmitInput')
 }
 
 const setCurrencyShowValue = (state, preventEmitInput) => {
@@ -392,6 +396,7 @@ const inputValueHandler = $event => {
 		var checkIfDecimals = elem.value.split(options.value.decimalChar)[1]
 		if (checkIfDecimals.length === 0) elem.value = elem.value.split(options.value.decimalChar)[0]
 	}
+
 	currentCaretPositon.value = elem.selectionEnd
 	valueHasNegativeChar.value = false
 	handleValueChange(elem, $event.inputType === 'insertFromPaste')
@@ -407,14 +412,8 @@ const handleValueChange = (elem, insertedFromPaste, preventEmitInput) => {
 	elem.value = removingUnwantedChars(elem.value)
 
 	if (insertedFromPaste) elem.value = handlePasteValue(elem.value)
+	console.log(elem.value)
 	const decimals = checkDecimalCharsLength(elem.value)
-
-	if (!validateIfAmountInsideMaxValueRange(elem.value)) {
-		elem.value = _value.value
-		currentCaretPositon.value = currentCaretPositon.value + options.value.currencySymbol.length
-		setCaretPosition(elem, currentCaretPositon.value)
-		return
-	}
 	elem.value = unformat(elem.value)
 	elem.value = format(elem.value, decimals)
 
@@ -463,13 +462,13 @@ const removingUnwantedChars = value => {
 */
 const handlePasteValue = pastedValue => {
 	let value = removingUnwantedChars(pastedValue)
+
 	if (!pastedValue.length) valueHasNegativeChar.value = false
 
 	/*
 	* Second we will check if this value is a valid number
 	*/
 	if (!isNaN(value)) return parseFloatAndFormat(value)
-
 	/*
 	* Validating how many separators exist in our string, and which ones
 	*/
@@ -508,8 +507,12 @@ const handlePasteValue = pastedValue => {
 }
 
 const parseFloatAndFormat = value => {
-	if (!options.value.alwaysAllowDecimalCharacter) return parseFloat(value)
-	return parseFloat(value).toFixed(options.value.decimalsAllowed).replace('.', options.value.decimalChar)
+	if (!options.value.alwaysAllowDecimalCharacter) return value
+
+	const splitedValue = value.split('.')
+	const decimalNumber = Number(`0.${splitedValue[1]}`).toFixed(options.value.decimalsAllowed)
+
+	return `${splitedValue[0]},${decimalNumber.replace('0.', '')}`.replace('.', options.value.decimalChar)
 }
 
 /*
@@ -717,6 +720,7 @@ onMounted(() => {
 	if (props.value && !validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
 		console.warn(`Value <${props.value.toLocaleString('fullwide', { useGrouping: false })}> falls out of our maxValue <${options.value.maxValue}>`)
 	}
+
 	handleValueChange(inputDomRef.value, true)
 })
 </script>

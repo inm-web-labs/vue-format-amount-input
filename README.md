@@ -66,3 +66,4 @@ options = {
 - 0.2.03 - fixed logic behind removing currency from value
 - 0.2.04 - removed console.logs
 - 0.2.05 - fixed logic when on clear of value, currency would be showed; fixed setSelectionRange to only be trigger if user is focus on input
+- 0.2.06 - Fixed maxValue validations and handling
