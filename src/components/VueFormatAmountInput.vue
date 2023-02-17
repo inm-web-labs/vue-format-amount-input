@@ -90,25 +90,42 @@ const allowNegativeSign = (value, index, key) => {
 	if (key === '-' && index - (value.includes(options.value.currencySymbol) ? currencyLengthAtLeft.value : 0) === 0) return true
 }
 const addDecimalsToValue = value => {
-	let _value = `${value}${options.value.decimalChar}`
-	_value = _value.padEnd(_value.length + options.value.decimalsAllowed, '0')
+	let _value = value.includes(options.value.decimalChar) ? value : `${value}${options.value.decimalChar}`
+
+	const currentDecimals = _value.split(options.value.decimalChar)[1].length
+	const decimalsToAdd = options.value.decimalsAllowed - currentDecimals
+
+	/* we need to round current decimals */
+	if (decimalsToAdd < 0) {
+		_value = _value.substring(0, _value.length + decimalsToAdd)
+	} else {
+		_value = _value.padEnd(_value.length + decimalsToAdd, '0')
+	}
 	return _value
 }
 
-const validateIfAmountInsideMaxValueRange = value => {
+const validateIfAmountInsideMaxValueRange = (value) => {
+	let _value = removeCurrencySymbol(value)
+
 	/* Adding decimals allowed to our number for lengths compares */
-	let valueWidthDecimals = value.includes(options.value.decimalChar) ? value : addDecimalsToValue(value)
-	valueWidthDecimals = valueWidthDecimals.replaceAll(options.value.digitGroupSeparator, '')
+	_value = addDecimalsToValue(_value)
+	_value = _value.replaceAll(options.value.digitGroupSeparator, '')
+
+	let toWorkMaxValue = options.value.maxValue
+
+	if (!toWorkMaxValue.includes(options.value.decimalChar)) toWorkMaxValue = addDecimalsToValue(toWorkMaxValue)
 
 	/* First we check length, if length is lower we know the value is in range */
-	if (valueWidthDecimals.length < options.value.maxValue.length) return true
+	if (_value.length < toWorkMaxValue.length) return true
 	/* If the length is the same we will need to check each position */
-	else if (value.length === options.value.maxValue.length) {
+	else if (_value.length === toWorkMaxValue.length) {
 		let numberIsInRange = true
 		let i = 0
 
-		while (numberIsInRange && i < value.length) {
-			if (parseInt(value[i]) > parseInt(options.value.maxValue[i])) {
+		while (numberIsInRange && i < _value.length) {
+
+			if (_value[i] !== options.value.decimalChar && parseInt(_value[i]) > parseInt(toWorkMaxValue[i])) {
+				console.log('position check', _value[i], toWorkMaxValue[i])
 				numberIsInRange = false
 			}
 			i++
@@ -285,6 +302,15 @@ const keydownHandler = $event => {
 		$event.preventDefault()
 	}
 
+	/* Validating if next value will be bigger than maxValue */
+	if (isDigit($event.key)) {
+		const newValue = elem.value.slice(0, elem.selectionStart) + $event.key + elem.value.slice(elem.selectionStart)
+		if (!validateIfAmountInsideMaxValueRange(newValue)) {
+			$event.preventDefault()
+			return
+		}
+	}
+
 	/*
 	* If we already have 2 decimals chars,
 	* and user is trying to insert another one, we will want to change the next decimal to new inserted value
@@ -308,10 +334,6 @@ const keydownHandler = $event => {
 		setCaretPosition(elem, currentCaretPositon.value)
 
 		updateValue(elem.value)
-		$event.preventDefault()
-	}
-
-	if (isDigit($event.key) && !validateIfAmountInsideMaxValueRange(elem.value)) {
 		$event.preventDefault()
 	}
 }
