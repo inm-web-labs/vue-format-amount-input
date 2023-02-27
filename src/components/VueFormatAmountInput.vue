@@ -104,6 +104,24 @@ const addDecimalsToValue = value => {
 	return _value
 }
 
+/*
+* Remove currency from value
+@value { String }
+@return { String }
+*/
+const removeCurrencySymbol = value => {
+	if (options.value.currencySymbol.length) {
+		return value.replace(` ${options.value.currencySymbol}`, '').replace(`${options.value.currencySymbol} `, '')
+	} else return value
+}
+
+const parseMaxValue = maxValue => {
+	let toWorkMaxValue = options.value.maxValue
+
+	if (!toWorkMaxValue.includes(options.value.decimalChar)) toWorkMaxValue = addDecimalsToValue(toWorkMaxValue)
+	return toWorkMaxValue
+}
+
 const validateIfAmountInsideMaxValueRange = (value) => {
 	let _value = removeCurrencySymbol(value)
 
@@ -111,10 +129,7 @@ const validateIfAmountInsideMaxValueRange = (value) => {
 	_value = addDecimalsToValue(_value)
 	_value = _value.replaceAll(options.value.digitGroupSeparator, '')
 
-	let toWorkMaxValue = options.value.maxValue
-
-	if (!toWorkMaxValue.includes(options.value.decimalChar)) toWorkMaxValue = addDecimalsToValue(toWorkMaxValue)
-
+	const toWorkMaxValue = parseMaxValue(options.value.maxValue)
 	/* First we check length, if length is lower we know the value is in range */
 	if (_value.length < toWorkMaxValue.length) return true
 	/* If the length is the same we will need to check each position */
@@ -123,9 +138,10 @@ const validateIfAmountInsideMaxValueRange = (value) => {
 		let i = 0
 
 		while (numberIsInRange && i < _value.length) {
-
-			if (_value[i] !== options.value.decimalChar && parseInt(_value[i]) > parseInt(toWorkMaxValue[i])) {
-				console.log('position check', _value[i], toWorkMaxValue[i])
+			/* If value has same length, and number is smaller than same position, we know the value is smaller in a whole */
+			if (_value[i] !== options.value.decimalChar && parseInt(_value[i]) < parseInt(toWorkMaxValue[i])) {
+				break
+			} else if (_value[i] !== options.value.decimalChar && parseInt(_value[i]) > parseInt(toWorkMaxValue[i])) {
 				numberIsInRange = false
 			}
 			i++
@@ -303,7 +319,7 @@ const keydownHandler = $event => {
 	}
 
 	/* Validating if next value will be bigger than maxValue */
-	if (isDigit($event.key)) {
+	if (isDigit($event.key) && elem.selectionStart === elem.selectionEnd) {
 		const newValue = elem.value.slice(0, elem.selectionStart) + $event.key + elem.value.slice(elem.selectionStart)
 		if (!validateIfAmountInsideMaxValueRange(newValue)) {
 			$event.preventDefault()
@@ -675,17 +691,6 @@ const applyingCurrencySymbol = value => {
 }
 
 /*
-* Remove currency from value
-@value { String }
-@return { String }
-*/
-const removeCurrencySymbol = value => {
-	if (options.value.currencySymbol.length) {
-		return value.replace(` ${options.value.currencySymbol}`, '').replace(`${options.value.currencySymbol} `, '')
-	} else return value
-}
-
-/*
 * Replace current currency for new one
 @value { String }
 @newCurrency { String }
@@ -743,7 +748,7 @@ const updateValue = (value, preventEmitInput) => {
 onMounted(() => {
 	/* Warning user if the value exceeds max value allowed */
 	if (props.value && !validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
-		console.warn(`Value <${props.value.toLocaleString('fullwide', { useGrouping: false })}> falls out of our maxValue <${options.value.maxValue}>`)
+		console.warn(`Value <${props.value.toLocaleString('fullwide', { useGrouping: false })}> falls out of our maxValue <${parseMaxValue(options.value.maxValue)}>`)
 	}
 
 	handleValueChange(inputDomRef.value, true)
