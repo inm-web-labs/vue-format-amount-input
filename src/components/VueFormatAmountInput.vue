@@ -90,6 +90,8 @@ const allowNegativeSign = (value, index, key) => {
 	if (key === '-' && index - (value.includes(options.value.currencySymbol) ? currencyLengthAtLeft.value : 0) === 0) return true
 }
 const addDecimalsToValue = value => {
+	if (!value) return ''
+
 	let _value = value.includes(options.value.decimalChar) ? value : `${value}${options.value.decimalChar}`
 
 	const currentDecimals = _value.split(options.value.decimalChar)[1].length
@@ -186,6 +188,18 @@ watch(() => options.value.currencySymbol, (newVal, oldVal) => {
 	if (_value.value.length && _value.value.includes(oldVal)) _value.value = changeCurrencySymbol(_value.value, newVal, oldVal)
 })
 
+/* Watching if currency change, and reformat our value */
+watch(() => options.value.maxValue, (newVal, oldVal) => {
+	if (props.value) {
+		let parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
+		ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
+
+		if (!validateIfAmountInsideMaxValueRange(parsedValue)) {
+			_value.value = options.value.maxValue
+			setTimeout(() => handleValueChange(inputDomRef.value, true), 0)
+		}
+	}
+})
 /*************************************************
 *                                                *
 *              VALUE CHANGE HANDLERS             *
@@ -479,6 +493,7 @@ const handleValueChange = (elem, insertedFromPaste, preventEmitInput) => {
 @return { string }
 */
 const removingUnwantedChars = value => {
+	if (!value) return ''
     var valueArray = value.split('')
 	var valueArrayLength = valueArray.length
 
@@ -747,10 +762,14 @@ const updateValue = (value, preventEmitInput) => {
 
 onMounted(() => {
 	/* Warning user if the value exceeds max value allowed */
-	if (props.value && !validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
-		console.warn(`Value <${props.value.toLocaleString('fullwide', { useGrouping: false })}> falls out of our maxValue <${parseMaxValue(options.value.maxValue)}>`)
-	}
+	if (props.value) {
+		let parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
+		ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
 
+		if (!validateIfAmountInsideMaxValueRange(parsedValue)) {
+			console.warn(`Value <${parsedValue}> falls out of our maxValue <${parseMaxValue(options.value.maxValue)}>`)
+		}
+	}
 	handleValueChange(inputDomRef.value, true)
 })
 </script>
