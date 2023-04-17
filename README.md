@@ -70,3 +70,4 @@ options = {
 - 0.2.07 - Fixed maxValue validations for decimals and numbers with currencies
 - 0.2.08 - Fixed maxValue validation when number has same length; fixed validation when swapping amounts
 - 0.2.09 - Added watch to handleMaxValue change on input lifetime
+- 0.2.10 - Added logic on initial value setup, so decimals (when allowed) are showed on mounted

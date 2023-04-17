@@ -157,7 +157,20 @@ const validateIfAmountInsideMaxValueRange = (value) => {
 *                     DATA                       *
 *                                                *
 *************************************************/
-const _value = ref(props.value && validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false })) ? props.value.toString() : '')
+const getInitValue = () => {
+	if (props.value && validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
+		let initialValue = props.value
+		/* If we have value and its has no decimals, if the number have have decimals we will need to display them on mounted */
+		if (!initialValue.toString().includes('.') && options.value.alwaysAllowDecimalCharacter) {
+			initialValue = initialValue.toFixed(options.value.decimalsAllowed)
+		}
+
+		return initialValue.toString()
+	}
+	return ''
+}
+
+const _value = ref(getInitValue())
 const inputDomRef = ref('')
 const showCurrency = ref(false)
 const disableInput = ref(true)
