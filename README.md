@@ -29,7 +29,7 @@ Options allow you to customize how the input will format the amount as you type.
 | `showCurrencyOnHover` | Defines if currency should be shown on input hover | `false` |
 | `currencySymbol` | Defines currency symbol to display | `null` |
 | `currencySymbolPlacement` | Defines where currencySymbol will be displayed. Possible values `p` for prefix and `s` for suffix | `p` |
-| `maxValue` | The maximum value that can be entered | `99999999999999999999999.99` |
+| `maxValue` | The maximum value that can be entered | `999999999999999999999999.99` |
 
 Our Input will receive these options as an Object in prop `options` as the example below:
 ```
@@ -71,3 +71,4 @@ options = {
 - 0.2.08 - Fixed maxValue validation when number has same length; fixed validation when swapping amounts
 - 0.2.09 - Added watch to handleMaxValue change on input lifetime
 - 0.2.10 - Added logic on initial value setup, so decimals (when allowed) are showed on mounted
+- 0.2.11 - Fixed validation for maxValue on initial render with value

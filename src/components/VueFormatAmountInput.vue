@@ -56,7 +56,7 @@ const defaultOptions = {
 	showCurrencyOnHover: false,
 	currencySymbolPlacement: 'p',
 	currencySymbol: '',
-	maxValue: '99999999999999999999999.99'
+	maxValue: '999999999999999999999999.99'
 }
 
 /* Joining default options with received */
@@ -148,6 +148,7 @@ const validateIfAmountInsideMaxValueRange = (value) => {
 			}
 			i++
 		}
+
 		return numberIsInRange
 	} else return false
 }
@@ -157,8 +158,14 @@ const validateIfAmountInsideMaxValueRange = (value) => {
 *                     DATA                       *
 *                                                *
 *************************************************/
+const ALLOWED_DECIMAL_SEPARATORS = [',', '.', '٫']
+const INTEGER_PATTERN = '(0|[1-9]\\d*)'
+
 const getInitValue = () => {
-	if (props.value && validateIfAmountInsideMaxValueRange(props.value.toLocaleString('fullwide', { useGrouping: false }))) {
+	let parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
+	ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
+
+	if (props.value && validateIfAmountInsideMaxValueRange(parsedValue)) {
 		let initialValue = props.value
 		/* If we have value and its has no decimals, if the number have have decimals we will need to display them on mounted */
 		if (!initialValue.toString().includes('.') && options.value.alwaysAllowDecimalCharacter) {
@@ -166,8 +173,9 @@ const getInitValue = () => {
 		}
 
 		return initialValue.toString()
+	} else {
+		return ''
 	}
-	return ''
 }
 
 const _value = ref(getInitValue())
@@ -176,10 +184,6 @@ const showCurrency = ref(false)
 const disableInput = ref(true)
 const inputOnFocus = ref(false)
 const triggerFocusCaret = ref(false)
-
-const ALLOWED_DECIMAL_SEPARATORS = [',', '.', '٫']
-const INTEGER_PATTERN = '(0|[1-9]\\d*)'
-
 /* we could also use selectionStart, since both props are the same when writing */
 const currentCaretPositon = ref(0)
 const valueHasNegativeChar = ref(false)
