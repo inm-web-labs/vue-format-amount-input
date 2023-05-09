@@ -162,8 +162,11 @@ const ALLOWED_DECIMAL_SEPARATORS = [',', '.', '٫']
 const INTEGER_PATTERN = '(0|[1-9]\\d*)'
 
 const getInitValue = () => {
-	let parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
-	ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
+	let parsedValue
+	if (props.value) {
+		parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
+		ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
+	}
 
 	if (props.value && validateIfAmountInsideMaxValueRange(parsedValue)) {
 		let initialValue = props.value

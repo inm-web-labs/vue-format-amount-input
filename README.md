@@ -72,3 +72,4 @@ options = {
 - 0.2.09 - Added watch to handleMaxValue change on input lifetime
 - 0.2.10 - Added logic on initial value setup, so decimals (when allowed) are showed on mounted
 - 0.2.11 - Fixed validation for maxValue on initial render with value
+- 0.2.12 - Added missing validation before trying to stringify value
