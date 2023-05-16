@@ -199,7 +199,7 @@ const valueHasNegativeChar = ref(false)
 /* We want to watch external changes on value and re-format our input value when it changes */
 watch(() => props.value, (newVal, oldVal) => {
 	if (newVal === formatToOnlyAmount(_value.value)) return
-	_value.value = newVal
+	_value.value = getInitValue(newVal)
 	setTimeout(() => handleValueChange(inputDomRef.value, true), 0)
 })
 
