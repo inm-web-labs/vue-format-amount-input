@@ -394,6 +394,10 @@ const keydownHandler = $event => {
 @return { void }
 */
 const blurHandler = $event => {
+	if (!_value.value.length) {
+		emit('blur')
+		return
+	}
 	inputOnFocus.value = false
 
 	const valueWithoutCurrency = removeCurrencySymbol(_value.value)
