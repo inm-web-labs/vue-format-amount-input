@@ -2,6 +2,7 @@
 	<input
 	type="text"
 	ref="inputDomRef"
+	:inputmode="options.isIOS ? 'decimal' : 'numeric'"
 	:value="_value"
 	:placeholder="placeholder"
 	:disabled="disableInput"
@@ -33,6 +34,7 @@ const emit = defineEmits(['input', 'keydown', 'blur'])
 	- currencySymbolPlacement: { String } default value => 'p'
 	- currencySymbol: { String } default value => ''
 	- maxValue: { String } default value => '99999999999999999999999.99'
+	- isIOS: {Boolean} default value => false, we need this to specify inputmode when using this plugin on mobile apps/browsers
 */
 const props = defineProps({
 	value: [String, Number],

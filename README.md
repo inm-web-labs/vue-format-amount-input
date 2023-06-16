@@ -30,6 +30,7 @@ Options allow you to customize how the input will format the amount as you type.
 | `currencySymbol` | Defines currency symbol to display | `null` |
 | `currencySymbolPlacement` | Defines where currencySymbol will be displayed. Possible values `p` for prefix and `s` for suffix | `p` |
 | `maxValue` | The maximum value that can be entered | `999999999999999999999999.99` |
+| `isIOS` | Boolean to set inputMode when used on mobile apps/browsers | `false` |
 
 Our Input will receive these options as an Object in prop `options` as the example below:
 ```
@@ -75,3 +76,4 @@ options = {
 - 0.2.12 - Added missing validation before trying to stringify value
 - 0.2.13 - Added missing validations for value on watch
 - 0.2.14 - Fixed blur logic when value is empty
+- 0.2.15 - Added inputMode to input, and option to help define inputMode specifc for iOS apps/browsers
