@@ -19,7 +19,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 /* Emmitters */
-const emit = defineEmits(['input', 'keydown', 'blur'])
+const emit = defineEmits(['input', 'keydown', 'blur', 'pastedValueFallsOutOfMaxValue'])
 
 /** props received
 @value { String, Number }
@@ -480,7 +480,7 @@ const inputValueHandler = $event => {
 
 	currentCaretPositon.value = elem.selectionEnd
 	valueHasNegativeChar.value = false
-	handleValueChange(elem, $event.inputType === 'insertFromPaste')
+	handleValueChange(elem, $event.inputType === 'insertFromPaste', null, 'emitIfFallsOutOfMaxValue')
 }
 
 /*
@@ -489,10 +489,18 @@ const inputValueHandler = $event => {
 @insertedFromPaste { Boolean }
 @return { string }
 */
-const handleValueChange = (elem, insertedFromPaste, preventEmitInput) => {
+const handleValueChange = (elem, insertedFromPaste, preventEmitInput, emitIfFallsOutOfMaxValue) => {
 	elem.value = removingUnwantedChars(elem.value)
 
-	if (insertedFromPaste) elem.value = handlePasteValue(elem.value)
+	if (insertedFromPaste) {
+		elem.value = handlePasteValue(elem.value)
+
+		if (!validateIfAmountInsideMaxValueRange(elem.value) && emitIfFallsOutOfMaxValue) {
+			emit('pastedValueFallsOutOfMaxValue')
+			console.warn(`Value <${elem.value}> falls out of our maxValue <${parseMaxValue(options.value.maxValue)}>`)
+			elem.value = ''
+		}
+	}
 
 	const decimals = checkDecimalCharsLength(elem.value)
 	elem.value = unformat(elem.value)
@@ -584,7 +592,6 @@ const handlePasteValue = pastedValue => {
 	}
 
 	ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { value = value.replaceAll(separator, '') })
-
 	return parseFloatAndFormat(value)
 }
 
@@ -592,7 +599,7 @@ const parseFloatAndFormat = value => {
 	if (!options.value.alwaysAllowDecimalCharacter) return value
 
 	const splitedValue = value.split('.')
-	const decimalNumber = Number(`0.${splitedValue[1]}`).toFixed(options.value.decimalsAllowed)
+	const decimalNumber = splitedValue[1] ? Number(`0.${splitedValue[1]}`).toFixed(options.value.decimalsAllowed) : ''
 
 	return `${splitedValue[0]},${decimalNumber.replace('0.', '')}`.replace('.', options.value.decimalChar)
 }

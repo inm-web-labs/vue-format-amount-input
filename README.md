@@ -77,3 +77,4 @@ options = {
 - 0.2.13 - Added missing validations for value on watch
 - 0.2.14 - Fixed blur logic when value is empty
 - 0.2.15 - Added inputMode to input, and option to help define inputMode specifc for iOS apps/browsers
+- 0.2.16 - Added logic for pasted values when they fall out of maxValue
