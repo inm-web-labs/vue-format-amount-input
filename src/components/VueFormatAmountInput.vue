@@ -85,7 +85,9 @@ const currencyLengthAtRight = computed(() => {
 *                VALIDATORS HELPERS              *
 *                                                *
 *************************************************/
-const isValidSeparator = key => { return !!ALLOWED_DECIMAL_SEPARATORS.find(separator => separator === key) }
+const isValidSeparator = key => {
+	return !!ALLOWED_DECIMAL_SEPARATORS.find(separator => separator === key)
+}
 const isDigit = key => { return !!key.match(INTEGER_PATTERN) }
 const allowNegativeSign = (value, index, key) => {
 	if (!options.value.allowNegativeValues && key === '-') return false
@@ -624,7 +626,7 @@ const checkDecimalCharsLength = value => {
 
     for (var y = initPosition; y >= endPosition && y > 0; y--) {
 		const value = valArray[y]
-        const isSeparator = value === options.value.decimalChar && !!ALLOWED_DECIMAL_SEPARATORS.find(separator => value.includes(separator))
+        const isSeparator = !!ALLOWED_DECIMAL_SEPARATORS.find(separator => value.includes(separator))
 
 		if (isSeparator) {
 			decimalChars = initPosition - y
