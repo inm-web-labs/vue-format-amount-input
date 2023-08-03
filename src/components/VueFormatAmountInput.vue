@@ -122,7 +122,7 @@ const removeCurrencySymbol = value => {
 const parseMaxValue = maxValue => {
 	let toWorkMaxValue = options.value.maxValue
 
-	if (!toWorkMaxValue.includes(options.value.decimalChar)) toWorkMaxValue = addDecimalsToValue(toWorkMaxValue)
+	if (!ALLOWED_DECIMAL_SEPARATORS.find(separator => toWorkMaxValue.includes(separator))) toWorkMaxValue = addDecimalsToValue(toWorkMaxValue)
 	return toWorkMaxValue
 }
 
