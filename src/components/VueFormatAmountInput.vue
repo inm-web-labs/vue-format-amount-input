@@ -764,7 +764,7 @@ const formatToOnlyAmount = value => {
 	valueNumbered = applyingDecimals(valueNumbered, decimals, true)
 
 	/* Adding negative sign */
-	if (options.value.allowNegativeValues && valueHasNegativeChar.value) valueNumbered = valueNumbered * -1
+	if (options.value.allowNegativeValues && valueHasNegativeChar.value) valueNumbered = `-${valueNumbered}`
 
 	return valueNumbered
 }
