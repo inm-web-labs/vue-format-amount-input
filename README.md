@@ -80,3 +80,4 @@ options = {
 - 0.2.16 - Added logic for pasted values when they fall out of maxValue
 - 0.2.17 - Fixed validation for decimalsChars; Fixed maxValue logic when having decimals
 - 0.2.18 - Fixed formating value before emiting it when its value is negative
+- 0.2.19 - Added emit for keydown.enter

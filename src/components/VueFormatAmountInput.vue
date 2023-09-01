@@ -10,6 +10,7 @@
 	@input="inputValueHandler"
 	@focus="focusHandler"
 	@blur="blurHandler"
+    @keyup.enter="emit('onEnter')"
 	@mouseover="mouseOverHandler"
 	@mouseleave="mouseLeaveHandler"/>
 </template>
@@ -19,7 +20,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 /* Emmitters */
-const emit = defineEmits(['input', 'keydown', 'blur', 'pastedValueFallsOutOfMaxValue'])
+const emit = defineEmits(['input', 'keydown', 'blur', 'onEnter', 'pastedValueFallsOutOfMaxValue'])
 
 /** props received
 @value { String, Number }
