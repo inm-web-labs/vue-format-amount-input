@@ -195,6 +195,7 @@ const triggerFocusCaret = ref(false)
 /* we could also use selectionStart, since both props are the same when writing */
 const currentCaretPositon = ref(0)
 const valueHasNegativeChar = ref(false)
+const replaceZerosLeft = ref(false)
 
 /*************************************************
 *                                                *
@@ -271,13 +272,21 @@ const keydownHandler = $event => {
 		elem.value.charAt(currencyLengthAtLeft.value) === '0' &&
 		elem.selectionEnd - 1 === currencyLengthAtLeft.value) {
 		/* saving caret position for setting it later */
-		currentCaretPositon.value = elem.selectionEnd + 1
-		elem.value = stringReplaceAt(elem.value, currencyLengthAtLeft.value, $event.key)
+		currentCaretPositon.value = $event.key === '0' ? elem.selectionEnd - 1 : elem.selectionEnd
+		elem.value = stringReplaceAt(elem.value, currencyLengthAtLeft.value, $event.key === '0' ? '' : $event.key)
 		setCaretPosition(elem, currentCaretPositon.value)
 
 		updateValue(elem.value)
 		$event.preventDefault()
 		return
+	}
+
+    /* Replacing zero at left, if another number is inserted at left of decimalChar */
+	if (isDigit($event.key) &&
+		elem.value.charAt(currencyLengthAtLeft.value) === '0' &&
+        elem.selectionEnd !== currencyLengthAtLeft.value &&
+        elem.value.charAt(elem.selectionEnd) !== options.value.decimalChar) {
+        replaceZerosLeft.value = true
 	}
 
 	/* Preventing user from adding more than one decimalChar */
@@ -507,6 +516,7 @@ const handleValueChange = (elem, insertedFromPaste, preventEmitInput, emitIfFall
 
 	const decimals = checkDecimalCharsLength(elem.value)
 	elem.value = unformat(elem.value)
+    if (replaceZerosLeft.value) elem.value = removeLeftZeros(elem.value)
 	elem.value = format(elem.value, decimals)
 
 	/**
@@ -562,6 +572,7 @@ const handlePasteValue = pastedValue => {
 	* Second we will check if this value is a valid number
 	*/
 	if (!isNaN(value)) return parseFloatAndFormat(value)
+
 	/*
 	* Validating how many separators exist in our string, and which ones
 	*/
@@ -603,8 +614,9 @@ const parseFloatAndFormat = value => {
 
 	const splitedValue = value.split('.')
 	const decimalNumber = splitedValue[1] ? Number(`0.${splitedValue[1]}`).toFixed(options.value.decimalsAllowed) : ''
+    const wholeNumber = splitedValue[0].length && splitedValue[0] !== 0 ? Number(splitedValue[0]) : splitedValue[0]
 
-	return `${splitedValue[0]},${decimalNumber.replace('0.', '')}`.replace('.', options.value.decimalChar)
+	return `${wholeNumber},${decimalNumber.replace('0.', '')}`.replace('.', options.value.decimalChar)
 }
 
 /*
@@ -649,6 +661,19 @@ const unformat = value => {
 	currentCaretPositon.value = currentCaretPositon.value - (val.length - numbers.length)
 
 	return numbers
+}
+
+const removeLeftZeros = value => {
+    let charsToReplaceAtLeft = 0
+
+    for (let index = 0; index < value.length; index++) {
+        if (value.charAt(index) !== '0') break
+        charsToReplaceAtLeft++
+    }
+
+    currentCaretPositon.value = currentCaretPositon.value - charsToReplaceAtLeft
+    replaceZerosLeft.value = false
+    return value.slice(charsToReplaceAtLeft)
 }
 
 /*

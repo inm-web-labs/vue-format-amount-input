@@ -81,3 +81,4 @@ options = {
 - 0.2.17 - Fixed validation for decimalsChars; Fixed maxValue logic when having decimals
 - 0.2.18 - Fixed formating value before emiting it when its value is negative
 - 0.2.19 - Added emit for keydown.enter
+- 0.2.20 - Added logic to prevent zeros at left of natural number
