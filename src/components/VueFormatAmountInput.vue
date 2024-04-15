@@ -516,7 +516,7 @@ const handleValueChange = (elem, insertedFromPaste, preventEmitInput, emitIfFall
 
 	const decimals = checkDecimalCharsLength(elem.value)
 	elem.value = unformat(elem.value)
-    if (replaceZerosLeft.value) elem.value = removeLeftZeros(elem.value)
+    if (replaceZerosLeft.value) elem.value = removeLeftZeros(elem.value, decimals)
 	elem.value = format(elem.value, decimals)
 
 	/**
@@ -663,10 +663,10 @@ const unformat = value => {
 	return numbers
 }
 
-const removeLeftZeros = value => {
+const removeLeftZeros = (value, decimals) => {
     let charsToReplaceAtLeft = 0
 
-    for (let index = 0; index < value.length; index++) {
+    for (let index = 0; index < (value.length - (decimals + 1)); index++) {
         if (value.charAt(index) !== '0') break
         charsToReplaceAtLeft++
     }
