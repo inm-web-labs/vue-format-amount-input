@@ -168,12 +168,12 @@ const INTEGER_PATTERN = '(0|[1-9]\\d*)'
 
 const getInitValue = () => {
 	let parsedValue
-	if (props.value) {
+	if (props.value || props.value === 0) {
 		parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
 		ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
 	}
 
-	if (props.value && validateIfAmountInsideMaxValueRange(parsedValue)) {
+	if ((props.value || props.value === 0) && validateIfAmountInsideMaxValueRange(parsedValue)) {
 		let initialValue = props.value
 		/* If we have value and its has no decimals, if the number have have decimals we will need to display them on mounted */
 		if (!initialValue.toString().includes('.') && options.value.alwaysAllowDecimalCharacter) {
@@ -823,7 +823,7 @@ const updateValue = (value, preventEmitInput) => {
 
 onMounted(() => {
 	/* Warning user if the value exceeds max value allowed */
-	if (props.value) {
+	if (props.value || props.value === 0) {
 		let parsedValue = props.value.toLocaleString('fullwide', { useGrouping: false })
 		ALLOWED_DECIMAL_SEPARATORS.forEach(separator => { parsedValue = parsedValue.replaceAll(separator, options.value.decimalChar) })
 

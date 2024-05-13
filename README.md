@@ -83,3 +83,4 @@ options = {
 - 0.2.19 - Added emit for keydown.enter
 - 0.2.20 - Added logic to prevent zeros at left of natural number
 - 0.2.21 - Fixed bug removing zeros before decimal char and also removing decimal char
+- 0.2.22 - Fixed bug where inputValue being 0 would be treated as falsy validation
