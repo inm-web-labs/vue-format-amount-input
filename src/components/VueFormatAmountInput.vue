@@ -774,7 +774,18 @@ const applyingCurrencySymbol = value => {
 @return { String }
 */
 const changeCurrencySymbol = (value, newCurrency, oldCurrency) => {
-	return value.replace(oldCurrency, newCurrency)
+	// If there's no old currency, we need to add the new one with a space
+    if (!oldCurrency) {
+        if (!newCurrency) return value
+        if (options.value.currencySymbolPlacement === 'p') {
+            return `${newCurrency} ${value}`
+        } else {
+            return `${value} ${newCurrency}`
+        }
+    }
+
+    // Replace existing currency
+    return value.replace(oldCurrency, newCurrency)
 }
 
 /*
