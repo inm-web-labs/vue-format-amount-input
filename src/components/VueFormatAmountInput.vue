@@ -64,11 +64,17 @@ const defaultOptions = {
 
 /* Joining default options with received */
 const options = computed(() => {
-	return {
+	const merged = {
 		...defaultOptions,
 		...props.options,
-		maxValue: props.options.maxValue || defaultOptions.maxValue
+		maxValue: props.options?.maxValue || defaultOptions.maxValue
 	}
+
+	if (!props.options?.decimalChar && merged.digitGroupSeparator === '.') {
+		merged.decimalChar = ','
+	}
+
+	return merged
 })
 
 const currencyLengthAtLeft = computed(() => {
@@ -567,6 +573,18 @@ const handlePasteValue = pastedValue => {
 	let value = removingUnwantedChars(pastedValue)
 
 	if (!pastedValue.length) valueHasNegativeChar.value = false
+	if (!value.length) return ''
+
+    /* If pasted value has both '.' and ',' separators, decimal separator is the one most to the right */
+    if (value.includes(',') && value.includes('.')) {
+		const lastComma = value.lastIndexOf(',')
+		const lastDot = value.lastIndexOf('.')
+		const decimalSeparator = lastComma > lastDot ? ',' : '.'
+		const groupSeparator = decimalSeparator === ',' ? '.' : ','
+
+		value = value.replaceAll(groupSeparator, '').replace(decimalSeparator, '.')
+		return parseFloatAndFormat(value)
+	}
 
 	/*
 	* Second we will check if this value is a valid number
@@ -633,19 +651,11 @@ const checkDecimalCharsLength = value => {
 	/* Removing currencies to check decimals */
 	val = removeCurrencySymbol(val)
 
-	const valArray = val.split('')
-	const initPosition = valArray.length - 1
-	const endPosition = valArray.length - 3
+	const decimalIndex = val.lastIndexOf(options.value.decimalChar)
+	if (decimalIndex === -1) return null
 
-    for (var y = initPosition; y >= endPosition && y > 0; y--) {
-		const value = valArray[y]
-        const isSeparator = !!ALLOWED_DECIMAL_SEPARATORS.find(separator => value.includes(separator))
-
-		if (isSeparator) {
-			decimalChars = initPosition - y
-			break
-		}
-    }
+	decimalChars = val.length - decimalIndex - 1
+	if (decimalChars > options.value.decimalsAllowed) decimalChars = options.value.decimalsAllowed
 	return decimalChars
 }
 
