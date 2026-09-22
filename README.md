@@ -86,3 +86,4 @@ options = {
 - 0.2.22 - Fixed bug where inputValue being 0 would be treated as falsy validation
 - 0.2.23 - Added logic on currency watch for when no currency exists
 - 0.2.24 - Added logic to handle decimals chars when backspacing
+- 0.2.25 - Fixing leading zeros when we don't have a decimal place already
