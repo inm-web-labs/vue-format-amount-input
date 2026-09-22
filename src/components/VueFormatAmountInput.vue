@@ -265,13 +265,13 @@ const keydownHandler = $event => {
 		}
 	}
 
-	/* Preventing zeros from being inserted at left of number if we already have a decimalChar */
-	if ($event.key === '0' &&
-		elem.selectionEnd === currencyLengthAtLeft.value &&
-		elem.value.includes(options.value.decimalChar)) {
-		$event.preventDefault()
-		return
-	}
+	/* Preventing zeros from being inserted at left of number if we already have a digit there */
+    if ($event.key === '0' &&
+        elem.selectionEnd === currencyLengthAtLeft.value &&
+        removeCurrencySymbol(elem.value).length > 0) {
+        $event.preventDefault()
+        return
+    }
 
 	/* Replacing zero at left, if another number is inserted at left of decimalChar */
 	if (isDigit($event.key) &&
